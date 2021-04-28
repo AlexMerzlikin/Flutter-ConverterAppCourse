@@ -1,6 +1,7 @@
 name: task_06_input
 description: Work in progress for a Unit Converter app.
-
+environment:
+  sdk: '>=2.10.0 <3.0.0'
 dependencies:
   flutter:
     sdk: flutter

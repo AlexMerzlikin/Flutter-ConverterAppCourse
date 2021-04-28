@@ -70,7 +70,7 @@ class CategoryRoute extends StatelessWidget {
       categories.add(Category(
         name: _categoryNames[i],
         color: _baseColors[i],
-        iconLocation: Icons.cake,
+        iconData: Icons.cake,
         units: _retrieveUnitList(_categoryNames[i]),
       ));
     }

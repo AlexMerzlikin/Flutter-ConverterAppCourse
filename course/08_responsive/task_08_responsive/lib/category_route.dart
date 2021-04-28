@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import 'backdrop.dart';
@@ -98,21 +100,26 @@ class _CategoryRouteState extends State<CategoryRoute> {
     });
   }
 
-  // TODO: Use a GridView for landscape mode, passing in the device orientation
   /// Makes the correct number of rows for the list view, based on whether the
   /// device is portrait or landscape.
   ///
   /// For portrait, we use a [ListView]. For landscape, we use a [GridView].
   Widget _buildCategoryWidgets() {
-    return ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return CategoryTile(
-          category: _categories[index],
-          onTap: _onCategoryTap,
+    return OrientationBuilder(builder: (context, orientation) {
+      return
+        GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            childAspectRatio: 3.5,
+              crossAxisCount: (orientation == Orientation.portrait) ? 1 : 2),
+          itemBuilder: (BuildContext context, int index) {
+            return CategoryTile(
+              category: _categories[index],
+              onTap: _onCategoryTap,
+            );
+          },
+          itemCount: _categories.length,
         );
-      },
-      itemCount: _categories.length,
-    );
+    });
   }
 
   /// Returns a list of mock [Unit]s.
@@ -139,7 +146,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
 
     return Backdrop(
       currentCategory:
-          _currentCategory == null ? _defaultCategory : _currentCategory,
+      _currentCategory == null ? _defaultCategory : _currentCategory,
       frontPanel: _currentCategory == null
           ? UnitConverter(category: _defaultCategory)
           : UnitConverter(category: _currentCategory),

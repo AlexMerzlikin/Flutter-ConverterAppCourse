@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:task_07_backdrop/unit_converter.dart';
 
+import 'backdrop.dart';
 import 'category.dart';
 import 'category_tile.dart';
 import 'unit.dart';
@@ -25,7 +27,8 @@ class CategoryRoute extends StatefulWidget {
 }
 
 class _CategoryRouteState extends State<CategoryRoute> {
-  // TODO: Keep track of a default [Category], and the currently-selected
+  Category _currentCategory;
+
   // [Category]
   final _categories = <Category>[];
   static const _categoryNames = <String>[
@@ -77,7 +80,6 @@ class _CategoryRouteState extends State<CategoryRoute> {
   @override
   void initState() {
     super.initState();
-    // TODO: Set the default [Category] for the unit converter that opens
     for (var i = 0; i < _categoryNames.length; i++) {
       _categories.add(Category(
         name: _categoryNames[i],
@@ -86,11 +88,16 @@ class _CategoryRouteState extends State<CategoryRoute> {
         units: _retrieveUnitList(_categoryNames[i]),
       ));
     }
+
+    _currentCategory = _categories[0];
   }
 
-  // TODO: Fill out this function
   /// Function to call when a [Category] is tapped.
-  void _onCategoryTap(Category category) {}
+  void _onCategoryTap(Category category) {
+    setState(() {
+      _currentCategory = category;
+    });
+  }
 
   /// Makes the correct number of rows for the list view.
   ///
@@ -120,29 +127,30 @@ class _CategoryRouteState extends State<CategoryRoute> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Import and use the Backdrop widget
-    final listView = Container(
-      color: _backgroundColor,
-      padding: EdgeInsets.symmetric(horizontal: 8.0),
+    final listView = Padding(
+      padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 48.0),
       child: _buildCategoryWidgets(),
     );
 
-    final appBar = AppBar(
-      elevation: 0.0,
-      title: Text(
-        'Unit Converter',
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 30.0,
-        ),
+    final backdrop = Backdrop(
+      currentCategory: _currentCategory,
+      frontPanel: UnitConverter(category: _currentCategory),
+      backPanel: Container(
+        padding: EdgeInsets.only(bottom: 48.0),
+        child: listView,
       ),
-      centerTitle: true,
-      backgroundColor: _backgroundColor,
+      frontTitle: Text('Unit Converter',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 20.0,
+          )),
+      backTitle: Text('Select category',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 20.0,
+          )),
     );
 
-    return Scaffold(
-      appBar: appBar,
-      body: listView,
-    );
+    return backdrop;
   }
 }
