@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:task_11_api/api.dart';
 
 // TODO: Import necessary package
 import 'backdrop.dart';
@@ -32,11 +33,13 @@ class CategoryRoute extends StatefulWidget {
 class _CategoryRouteState extends State<CategoryRoute> {
   Category _defaultCategory;
   Category _currentCategory;
+
   // Widgets are supposed to be deeply immutable objects. We can update and edit
   // _categories as we build our app, and when we pass it into a widget's
   // `children` property, we call .toList() on it.
   // For more details, see https://github.com/dart-lang/sdk/issues/27755
   final _categories = <Category>[];
+  final _api = new Api();
   static const _baseColors = <ColorSwatch>[
     ColorSwatch(0xFF6AB7A8, {
       'highlight': Color(0xFF6AB7A8),
@@ -92,7 +95,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
     // We only want to load our data in once
     if (_categories.isEmpty) {
       await _retrieveLocalCategories();
-      // TODO: Call _retrieveApiCategory() here
+      await _retrieveApiCategory();
     }
   }
 
@@ -110,7 +113,7 @@ class _CategoryRouteState extends State<CategoryRoute> {
     var categoryIndex = 0;
     data.keys.forEach((key) {
       final List<Unit> units =
-          data[key].map<Unit>((dynamic data) => Unit.fromJson(data)).toList();
+      data[key].map<Unit>((dynamic data) => Unit.fromJson(data)).toList();
 
       var category = Category(
         name: key,
@@ -128,9 +131,26 @@ class _CategoryRouteState extends State<CategoryRoute> {
     });
   }
 
-  // TODO: Add the Currency Category retrieved from the API, to our _categories
   /// Retrieves a [Category] and its [Unit]s from an API on the web
-  Future<void> _retrieveApiCategory() async {}
+  Future<void> _retrieveApiCategory() async {
+    final String currencyCategory = "Currency";
+    var json = await _api.getUnits(currencyCategory);
+    if (json != null) {
+      final units = <Unit>[];
+      for (var unit in json) {
+        units.add(Unit.fromJson(unit));
+      }
+      setState(() {
+        _categories.add(Category(
+          name: currencyCategory,
+          units: units,
+          color: _baseColors.last,
+          iconLocation: _icons.last,
+        ));
+      });
+    }
+
+  }
 
   /// Function to call when a [Category] is tapped.
   void _onCategoryTap(Category category) {
@@ -189,11 +209,13 @@ class _CategoryRouteState extends State<CategoryRoute> {
         right: 8.0,
         bottom: 48.0,
       ),
-      child: _buildCategoryWidgets(MediaQuery.of(context).orientation),
+      child: _buildCategoryWidgets(MediaQuery
+          .of(context)
+          .orientation),
     );
     return Backdrop(
       currentCategory:
-          _currentCategory == null ? _defaultCategory : _currentCategory,
+      _currentCategory == null ? _defaultCategory : _currentCategory,
       frontPanel: _currentCategory == null
           ? UnitConverter(category: _defaultCategory)
           : UnitConverter(category: _currentCategory),
