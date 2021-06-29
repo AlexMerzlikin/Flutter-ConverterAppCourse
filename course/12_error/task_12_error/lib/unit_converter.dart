@@ -36,7 +36,7 @@ class _UnitConverterState extends State<UnitConverter> {
   List<DropdownMenuItem> _unitMenuItems;
   bool _showValidationError = false;
   final _inputKey = GlobalKey(debugLabel: 'inputText');
-  // TODO: Add a flag for whether to show error UI
+  bool _showNetworkError = false;
 
   @override
   void initState() {
@@ -50,6 +50,7 @@ class _UnitConverterState extends State<UnitConverter> {
     super.didUpdateWidget(old);
     // We update our [DropdownMenuItem] units when we switch [Categories].
     if (old.category != widget.category) {
+      _showNetworkError = false;
       _createDropdownMenuItems();
       _setDefaults();
     }
@@ -109,8 +110,16 @@ class _UnitConverterState extends State<UnitConverter> {
       final api = Api();
       final conversion = await api.convert(apiCategory['route'],
           _inputValue.toString(), _fromValue.name, _toValue.name);
-      // TODO: Check whether to show an error UI
+      if (conversion == null) {
+        setState(() {
+          _showNetworkError = true;
+          _inputValue = 0;
+          _convertedValue = "";
+        });
+        return;
+      }
       setState(() {
+        _showNetworkError = false;
         _convertedValue = _format(conversion);
       });
     } else {
@@ -184,8 +193,8 @@ class _UnitConverterState extends State<UnitConverter> {
       child: Theme(
         // This sets the color of the [DropdownMenuItem]
         data: Theme.of(context).copyWith(
-              canvasColor: Colors.grey[50],
-            ),
+          canvasColor: Colors.grey[50],
+        ),
         child: DropdownButtonHideUnderline(
           child: ButtonTheme(
             alignedDropdown: true,
@@ -203,7 +212,24 @@ class _UnitConverterState extends State<UnitConverter> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Build an error UI
+    if (_showNetworkError) {
+      return new SingleChildScrollView(
+          child: Column(
+            children: [
+              Icon(
+                Icons.error_outline_rounded,
+                size: 200,
+                color: widget.category.color["error"],
+              ),
+              Text("Cannot connect to the server",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headline4.copyWith(
+                        color: Colors.black,
+                      ))
+            ],
+          ),
+      );
+    }
 
     final input = Padding(
       padding: _padding,

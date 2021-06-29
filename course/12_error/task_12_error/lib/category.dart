@@ -30,4 +30,6 @@ class Category {
         assert(color != null),
         assert(units != null),
         assert(iconLocation != null);
+
+  bool isAvailable() => units.isNotEmpty;
 }
